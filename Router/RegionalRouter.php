@@ -2,17 +2,8 @@
 
 namespace TPN\RegionalRoutingBundle\Router;
 
-use TPN\RegionalRoutingBundle\Exception\NotAcceptableLanguageException;
-
-use TPN\RegionalRoutingBundle\Router\RegionalLoader;
-use TPN\RegionalRoutingBundle\Router\LocaleResolverInterface;
-use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
-use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Regional Router
@@ -21,5 +12,45 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RegionalRouter extends Router
 {
+    const PREFIX  = 'RR';
+
+    private $routeRegionalizer;
+
+    public function setRouteRegionalizer(RouteRegionalizer $routeRegionalizer)
+    {
+        $this->routeRegionalizer = $routeRegionalizer;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRouteCollection()
+    {
+        $collection = parent::getRouteCollection();
+
+        $this->collection = $this->routeRegionalizer->createRegionalizedRoutes($collection);
+
+        return $this->collection;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function generate($name, $parameters = array(), $referenceType = self::ABSOLUTE_PATH)
+    {
+
+        $region = $this->context->getParameter('_region');
+
+        if (isset($parameters['_region'])) {
+            $region = $parameters['_region'];
+            unset($parameters['_region']);
+        }
+
+        try {
+            return parent::generate($region.self::PREFIX.$name, $parameters, $referenceType);
+        } catch (RouteNotFoundException $ex) {
+            return parent::generate($name, $parameters, $referenceType);
+        }
+    }
 
 }

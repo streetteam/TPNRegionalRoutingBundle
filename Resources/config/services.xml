@@ -6,33 +6,33 @@
 
     <parameters>
         <parameter key="tpn.router.class">TPN\RegionalRoutingBundle\Router\RegionalRouter</parameter>
-
+        <parameter key="tpn.router.route.regionalizer.class">TPN\RegionalRoutingBundle\Router\RouteRegionalizer</parameter>
+        <parameter key="tpn.region_listener.class">TPN\RegionalRoutingBundle\EventListener\RegionListener</parameter>
     </parameters>
 
     <services>
 
-        <service id="router.default" class="%tpn.router.class%" public="false">
-            <tag name="monolog.logger" channel="router" />
-            <argument type="service" id="service_container" />
-            <argument>%router.resource%</argument>
-            <argument type="collection">
-                <argument key="cache_dir">%kernel.cache_dir%</argument>
-                <argument key="debug">%kernel.debug%</argument>
-                <argument key="generator_class">%router.options.generator_class%</argument>
-                <argument key="generator_base_class">%router.options.generator_base_class%</argument>
-                <argument key="generator_dumper_class">%router.options.generator_dumper_class%</argument>
-                <argument key="generator_cache_class">%router.options.generator.cache_class%</argument>
-                <argument key="matcher_class">%router.options.matcher_class%</argument>
-                <argument key="matcher_base_class">%router.options.matcher_base_class%</argument>
-                <argument key="matcher_dumper_class">%router.options.matcher_dumper_class%</argument>
-                <argument key="matcher_cache_class">%router.options.matcher.cache_class%</argument>
-            </argument>
-            <argument type="service" id="router.request_context" on-invalid="ignore" />
-            <argument type="service" id="logger" on-invalid="ignore" />
+        <service id="tpn.regional_router" class="%tpn.router.class%" parent="router.default" public="false">
+            <call method="setRouteRegionalizer">
+                <argument type="service" id="tpn.router.route.regionalizer" />
+            </call>
         </service>
 
-        <service id="router" alias="router.default" />
+        <service id="router" alias="tpn.regional_router" />
 
+        <service id="tpn.router.route.regionalizer" class="%tpn.router.route.regionalizer.class%" public="false">
+            <argument type="collection">
+                <argument>gb</argument>
+                <argument>us</argument>
+                <argument>rest</argument>
+            </argument>
+        </service>
+
+
+        <service id="tpn.region_listener" class="%tpn.region_listener.class%">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="router" on-invalid="ignore" />
+        </service>
 
     </services>
 </container>

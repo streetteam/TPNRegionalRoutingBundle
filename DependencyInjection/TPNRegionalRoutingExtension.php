@@ -23,7 +23,6 @@ class TPNRegionalRoutingExtension extends Extension
         $loader = new XmlFileLoader($container, new FileLocator(array(__DIR__.'/../Resources/config')));
         $loader->load('services.xml');
 
-
     }
 
     public function getAlias()
