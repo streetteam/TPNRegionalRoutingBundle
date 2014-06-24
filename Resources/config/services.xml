@@ -21,11 +21,7 @@
         <service id="router" alias="tpn.regional_router" />
 
         <service id="tpn.router.route.regionalizer" class="%tpn.router.route.regionalizer.class%" public="false">
-            <argument type="collection">
-                <argument>gb</argument>
-                <argument>us</argument>
-                <argument>rest</argument>
-            </argument>
+            <argument>%tpn_regional_routing.regions%</argument>
         </service>
 
 

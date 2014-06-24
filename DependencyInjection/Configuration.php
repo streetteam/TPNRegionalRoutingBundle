@@ -11,6 +11,13 @@ final class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('tpn_regional_router');
+        $rootNode->children()
+            ->arrayNode('regions')
+                ->isRequired()
+                ->requiresAtLeastOneElement()
+                ->prototype('scalar')->end()
+            ->end()
+        ->end();
 
         return $treeBuilder;
     }
