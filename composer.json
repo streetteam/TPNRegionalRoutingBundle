@@ -1,5 +1,5 @@
 {
-    "name":         "yourvine/regional-routing",
+    "name":         "tpn/regional-routing",
     "description":  "This bundle regionalize your routes",
     "keywords":     ["routing"],
     "type":         "symfony-bundle",
