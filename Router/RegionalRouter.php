@@ -40,7 +40,7 @@ class RegionalRouter extends Router
     {
 
         $region = $this->context->getParameter('_region');
-
+        $name = $this->removePrefixFromRoute($name);
         if (isset($parameters['_region'])) {
             $region = $parameters['_region'];
             unset($parameters['_region']);
@@ -51,6 +51,16 @@ class RegionalRouter extends Router
         } catch (RouteNotFoundException $ex) {
             return parent::generate($name, $parameters, $referenceType);
         }
+    }
+
+    private function removePrefixFromRoute($name)
+    {
+        $regionalRoute = strstr($name, RegionalRouter::PREFIX);
+        if ($regionalRoute) {
+            return str_replace(RegionalRouter::PREFIX, '', $regionalRoute);
+        }
+
+        return $name;
     }
 
 }

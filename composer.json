@@ -12,7 +12,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "symfony/framework-bundle": "~2.2"
+        "symfony/framework-bundle": "~2.2",
+        "maxmind/geoip": "dev-master"
     },
     "require-dev": {
         "symfony/framework-bundle": "2.2.*",

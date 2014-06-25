@@ -17,6 +17,9 @@ final class Configuration implements ConfigurationInterface
                 ->requiresAtLeastOneElement()
                 ->prototype('scalar')->end()
             ->end()
+            ->scalarNode('choose_region_route')
+                ->isRequired()
+            ->end()
         ->end();
 
         return $treeBuilder;

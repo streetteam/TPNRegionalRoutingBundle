@@ -9,6 +9,7 @@
 namespace TPN\RegionalRoutingBundle\Tests\EventListener;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\KernelEvents;
 use TPN\RegionalRoutingBundle\EventListener\RegionListener;
 use Mockery as M;
 
@@ -23,15 +24,23 @@ class RegionListenerTest extends \PHPUnit_Framework_TestCase
         $router->shouldReceive('getContext')->andReturn($requestContext);
 
         $request= M::mock('Symfony\Component\HttpFoundation\Request');
-        $request->shouldReceive('getSession')->andReturn(new ParameterBag(array('countryCode', 'DE')));
-        $request->attributes = new ParameterBag(array('_region' => 'de'));
-        $request->cookies = new ParameterBag(array('regionSelected' => 'de'));
+        $request->attributes = M::mock('Symfony\Component\HttpFoundation\ParameterBag')->shouldReceive('set')->with('de');
+        $request->cookies = M::mock('Symfony\Component\HttpFoundation\ParameterBag')->shouldReceive('set')->with('de');
 
         $responseEvent = M::mock('Symfony\Component\HttpKernel\Event\GetResponseEvent');
         $responseEvent->shouldReceive('getRequest')->andReturn($request);
 
-        $regionListener = new RegionListener($router);
+        $regionResolver = M::mock('TPN\RegionalRoutingBundle\Router\RegionResolver');
+        $regionResolver->shouldReceive('resolveRegion')->andReturn('de');
+        $regionResolver->shouldReceive('getRouteRegion')->andReturn('de');
+
+        $regionListener = new RegionListener($regionResolver, $router);
         $regionListener->onKernelRequest($responseEvent);
+    }
+
+    public function testSubscribedEvents()
+    {
+        $this->assertEquals(array(KernelEvents::REQUEST => array(array('onKernelRequest', 31))), RegionListener::getSubscribedEvents());
     }
 
 }

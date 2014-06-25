@@ -29,8 +29,7 @@ class RouteRegionalizer
             }
 
             $regionalRoute = clone $route;
-            $regionalRoute->setOption('isRegionalized', true);
-            $regionalCollection->add(RegionalRouter::PREFIX.$name, $regionalRoute);
+            $regionalCollection->add($name, $regionalRoute);
 
             foreach ($this->regions as $region) {
                 $regionalRoute = clone $route;
