@@ -10,6 +10,10 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use TPN\RegionalRoutingBundle\Exception\RegionNotFoundException;
 use TPN\RegionalRoutingBundle\Router\RegionResolver;
 
+/**
+ * Class RegionResolverTest
+ * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
+ */
 class RegionResolverTest extends \PHPUnit_Framework_TestCase
 {
     private $geoIpRecord;
@@ -72,7 +76,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testGetRouteRegion()
     {
-        $this->request->shouldReceive('get')->with('_route')->andReturn('plRRroute_name');
+        $this->request->shouldReceive('get')->with('_route')->andReturn('pl--RR--route_name');
 
         $regionResolver = new RegionResolver($this->geoIpManager, $this->request);
 

@@ -4,15 +4,26 @@ namespace TPN\RegionalRoutingBundle\Router;
 
 use Symfony\Component\Routing\RouteCollection;
 
+/**
+ * Class RouteRegionalizer
+ * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
+ */
 class RouteRegionalizer
 {
     private $regions;
 
+    /**
+     * @param array $regions
+     */
     public function __construct(array $regions)
     {
         $this->regions = $regions;
     }
 
+    /**
+     * @param  RouteCollection $collection
+     * @return RouteCollection
+     */
     public function createRegionalizedRoutes(RouteCollection $collection)
     {
         $regionalCollection = new RouteCollection();
@@ -36,7 +47,7 @@ class RouteRegionalizer
                 $regionalRoute->setOption('isRegionalized', true);
                 $regionalRoute->setOption('_region', $region);
                 $regionalRoute->setPattern($region.$regionalRoute->getPattern());
-                $regionalCollection->add($region.RegionalRouter::PREFIX.$name, $regionalRoute);
+                $regionalCollection->add($region.RegionalRouter::ROUTE_PREFIX.$name, $regionalRoute);
             }
         }
 

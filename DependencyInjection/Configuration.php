@@ -5,6 +5,10 @@ namespace TPN\RegionalRoutingBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
+/**
+ * Class Configuration
+ * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
+ */
 final class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder()

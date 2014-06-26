@@ -8,16 +8,25 @@ use Symfony\Component\HttpFoundation\Request;
 use TPN\RegionalRoutingBundle\Exception\RegionNotFoundException;
 
 /**
- * Region Resolver
- *
+ * Class RegionResolver
  * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
  */
 class RegionResolver
 {
-
+    /**
+     * @var GeoipManager
+     */
     private $geoIp;
+
+    /**
+     * @var Request
+     */
     private $request;
 
+    /**
+     * @param GeoipManager $geoIp
+     * @param Request      $request
+     */
     public function __construct(GeoipManager $geoIp, Request $request)
     {
         $this->geoIp = $geoIp;
@@ -53,11 +62,17 @@ class RegionResolver
         throw new RegionNotFoundException("Region not found");
     }
 
+    /**
+     * @return string|null region
+     */
     public function getRouteRegion()
     {
-        return strstr($this->request->get('_route'), RegionalRouter::PREFIX, true);
+        return strstr($this->request->get('_route'), RegionalRouter::ROUTE_PREFIX, true);
     }
 
+    /**
+     * @return string|null region
+     */
     public function getFlashBagRegion()
     {
         $flashBagRegion = $this->request->getSession()->getFlashBag()->get('_region');
@@ -65,19 +80,25 @@ class RegionResolver
             return $flashBagRegion[0];
         }
 
-        return false;
+        return null;
     }
 
+    /**
+     * @return string|null region
+     */
     public function getCookieRegion()
     {
         return $this->request->cookies->get('_region');
     }
 
+    /**
+     * @return mixed region
+     */
     public function getGeoIpRegion()
     {
         $lookup = $this->geoIp->lookup($this->request->getClientIp());
 
-        return $lookup ? $lookup->getCountryCode() : false;
+        return $lookup ? $lookup->getCountryCode() : null;
     }
 
 }

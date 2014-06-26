@@ -7,6 +7,10 @@ use TPN\RegionalRoutingBundle\Router\RegionalRouter;
 use Symfony\Component\Routing\RouteCollection;
 use Mockery as M;
 
+/**
+ * Class RegionalRouterTest
+ * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
+ */
 class RegionalRouterTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -48,7 +52,7 @@ class RegionalRouterTest extends \PHPUnit_Framework_TestCase
        $container = M::mock('Symfony\Component\DependencyInjection\Container');
        $routeCollection = new RouteCollection();
        $routeCollection->add('bar', new Route('/bar'));
-       $routeCollection->add('gbRRbar', new Route('/gb/bar'));
+       $routeCollection->add('gb--RR--bar', new Route('/gb/bar'));
 
        $container->shouldReceive('get->load')->andReturn($routeCollection);
        $routeRegionalizer = M::mock('TPN\RegionalRoutingBundle\Router\RouteRegionalizer');

@@ -9,6 +9,7 @@
         <parameter key="tpn.router.route.regionalizer.class">TPN\RegionalRoutingBundle\Router\RouteRegionalizer</parameter>
         <parameter key="tpn.region_listener.class">TPN\RegionalRoutingBundle\EventListener\RegionListener</parameter>
         <parameter key="tpn.router.region_resolver.class">TPN\RegionalRoutingBundle\Router\RegionResolver</parameter>
+        <parameter key="tpn.router.region_cookie_factory.class">TPN\RegionalRoutingBundle\Factory\RegionCookieFactory</parameter>
     </parameters>
 
     <services>
@@ -30,10 +31,14 @@
             <argument type="service" id="request" strict="false"/>
         </service>
 
+        <service id="tpn.router.region_cookie_factory" class="%tpn.router.region_cookie_factory.class%">
+        </service>
+
         <service id="tpn.region_listener" class="%tpn.region_listener.class%">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="tpn.router.region_resolver"/>
             <argument type="service" id="router" on-invalid="ignore" />
+            <argument type="service" id="tpn.router.region_cookie_factory" />
             <argument>%tpn_regional_routing.choose_region_route%</argument>
         </service>
 

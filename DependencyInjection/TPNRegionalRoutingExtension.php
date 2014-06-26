@@ -9,9 +9,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
- * DI Extension.
- *
- * @author Wojciech Kulikowski <wojciech.kulikowski@gmail.com>
+ * Class TPNRegionalRoutingExtension
+ * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
  */
 class TPNRegionalRoutingExtension extends Extension
 {

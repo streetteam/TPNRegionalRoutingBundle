@@ -6,24 +6,29 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 /**
- * Regional Router
- *
+ * Class RegionalRouter
  * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
  */
 class RegionalRouter extends Router
 {
-    const PREFIX  = 'RR';
+    const ROUTE_PREFIX  = '--RR--';
 
+    /**
+     * @var RouteRegionalizer
+     */
     private $routeRegionalizer;
 
+    /**
+     * @param  RouteRegionalizer $routeRegionalizer
+     * @return RegionalRouter
+     */
     public function setRouteRegionalizer(RouteRegionalizer $routeRegionalizer)
     {
         $this->routeRegionalizer = $routeRegionalizer;
+
+        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRouteCollection()
     {
         $collection = parent::getRouteCollection();
@@ -33,9 +38,6 @@ class RegionalRouter extends Router
         return $this->collection;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function generate($name, $parameters = array(), $referenceType = self::ABSOLUTE_PATH)
     {
 
@@ -47,17 +49,21 @@ class RegionalRouter extends Router
         }
 
         try {
-            return parent::generate($region.self::PREFIX.$name, $parameters, $referenceType);
+            return parent::generate($region.self::ROUTE_PREFIX.$name, $parameters, $referenceType);
         } catch (RouteNotFoundException $ex) {
             return parent::generate($name, $parameters, $referenceType);
         }
     }
 
+    /**
+     * @param $name
+     * @return string non-regionalized route
+     */
     private function removePrefixFromRoute($name)
     {
-        $regionalRoute = strstr($name, RegionalRouter::PREFIX);
+        $regionalRoute = strstr($name, RegionalRouter::ROUTE_PREFIX);
         if ($regionalRoute) {
-            return str_replace(RegionalRouter::PREFIX, '', $regionalRoute);
+            return str_replace(RegionalRouter::ROUTE_PREFIX, '', $regionalRoute);
         }
 
         return $name;

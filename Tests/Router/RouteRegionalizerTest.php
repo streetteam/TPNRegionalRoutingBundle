@@ -6,6 +6,10 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use TPN\RegionalRoutingBundle\Router\RouteRegionalizer;
 
+/**
+ * Class RouteRegionalizerTest
+ * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
+ */
 class RouteRegionalizerTest extends \PHPUnit_Framework_TestCase
 {
     public function testRegionalize()

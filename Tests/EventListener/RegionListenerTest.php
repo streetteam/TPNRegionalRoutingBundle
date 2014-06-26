@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: qlik
- * Date: 23.06.14
- * Time: 16:58
- */
 
 namespace TPN\RegionalRoutingBundle\Tests\EventListener;
 
@@ -12,7 +6,12 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\KernelEvents;
 use TPN\RegionalRoutingBundle\EventListener\RegionListener;
 use Mockery as M;
+use TPN\RegionalRoutingBundle\Factory\RegionCookieFactory;
 
+/**
+ * Class RegionListenerTest
+ * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
+ */
 class RegionListenerTest extends \PHPUnit_Framework_TestCase
 {
     public function testRequestAttributes()
@@ -34,13 +33,21 @@ class RegionListenerTest extends \PHPUnit_Framework_TestCase
         $regionResolver->shouldReceive('resolveRegion')->andReturn('de');
         $regionResolver->shouldReceive('getRouteRegion')->andReturn('de');
 
-        $regionListener = new RegionListener($regionResolver, $router);
+        $regionCookieFactory = new RegionCookieFactory();
+
+        $regionListener = new RegionListener($regionResolver, $router, $regionCookieFactory, 'test_route');
         $regionListener->onKernelRequest($responseEvent);
     }
 
     public function testSubscribedEvents()
     {
-        $this->assertEquals(array(KernelEvents::REQUEST => array(array('onKernelRequest', 31))), RegionListener::getSubscribedEvents());
+        $this->assertEquals(
+            array(
+                KernelEvents::REQUEST => array(array('onKernelRequest', 31)),
+                KernelEvents::RESPONSE => 'onKernelResponse',
+            ),
+
+            RegionListener::getSubscribedEvents());
     }
 
 }

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: qlik
- * Date: 23.06.14
- * Time: 15:27
- */
 
 namespace TPN\RegionalRoutingBundle\EventListener;
 
@@ -17,19 +11,32 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use TPN\AdminBundle\Sonata\Region;
 use TPN\RegionalRoutingBundle\Exception\RegionNotFoundException;
+use TPN\RegionalRoutingBundle\Factory\RegionCookieFactory;
 use TPN\RegionalRoutingBundle\Router\RegionalRouter;
 use TPN\RegionalRoutingBundle\Router\RegionResolver;
 
+/**
+ * Class RegionListener
+ * @author Wojciech Kulikowski <kulikowski.wojciech@gmail.com>
+ */
 class RegionListener implements EventSubscriberInterface
 {
     private $router;
     private $resolver;
+    private $regionCookieFactory;
 
-    public function __construct(RegionResolver $resolver, RegionalRouter $router, $regionChooseRoute)
+    /**
+     * @param RegionResolver      $resolver
+     * @param RegionCookieFactory $regionCookieFactory
+     * @param RegionalRouter      $router
+     * @param $regionChooseRoute
+     */
+    public function __construct(RegionResolver $resolver, RegionalRouter $router, RegionCookieFactory $regionCookieFactory, $regionChooseRoute)
     {
         $this->resolver = $resolver;
         $this->router = $router;
-        $this->regionChooseRoute = 'tpn_promoter_landing_page_show';
+        $this->regionCookieFactory = $regionCookieFactory;
+        $this->regionChooseRoute = $regionChooseRoute;
 
     }
 
@@ -70,16 +77,8 @@ class RegionListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $response = $event->getResponse();
 
-        $cookie = new Cookie(
-            '_region',
-            $request->attributes->get('_region'),
-            time() + 3600 * 24 * 365 * 10,
-            '/'
-        );
-
-        //if ($session->get('setRegionSelectedCookie')) {
-            $response->headers->setCookie($cookie);
-        //}
+        $cookie = $this->regionCookieFactory->create($request->attributes->get('_region'));
+        $response->headers->setCookie($cookie);
     }
 
     public static function getSubscribedEvents()
