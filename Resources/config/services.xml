@@ -26,7 +26,7 @@
             <argument>%tpn_regional_routing.regions%</argument>
         </service>
 
-        <service id="tpn.router.region_resolver" class="%tpn.router.region_resolver.class%" public="false">
+        <service id="tpn.router.region_resolver" class="%tpn.router.region_resolver.class%">
             <argument type="service" id="maxmind.geoip" />
             <argument type="service" id="request" strict="false"/>
         </service>

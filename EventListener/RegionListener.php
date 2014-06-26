@@ -9,7 +9,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use TPN\AdminBundle\Sonata\Region;
 use TPN\RegionalRoutingBundle\Exception\RegionNotFoundException;
 use TPN\RegionalRoutingBundle\Factory\RegionCookieFactory;
 use TPN\RegionalRoutingBundle\Router\RegionalRouter;
@@ -48,17 +47,17 @@ class RegionListener implements EventSubscriberInterface
             $region = $this->resolver->resolveRegion();
         } catch (RegionNotFoundException $e) {
             if ($request->get('_route') != $this->regionChooseRoute) {
-                $landingUrl = $this->router->generate($this->regionChooseRoute, array(
-                    'brand' => 'tpn',
-                ));
+                $landingUrl = $this->router->generate($this->regionChooseRoute);
                 $event->setResponse(new RedirectResponse($landingUrl));
             }
 
             return;
         }
         $this->router->getContext()->setParameter('_region', $region);
+
         $request->cookies->set('_region', $region);
         $request->attributes->set('_region', $region);
+        $request->getSession()->set('_region', $region);
 
         $routeRegion = $this->resolver->getRouteRegion();
         if ($routeRegion != $region) {

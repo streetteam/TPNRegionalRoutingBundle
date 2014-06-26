@@ -22,9 +22,13 @@ class RegionListenerTest extends \PHPUnit_Framework_TestCase
         $router = M::mock('TPN\RegionalRoutingBundle\Router\RegionalRouter');
         $router->shouldReceive('getContext')->andReturn($requestContext);
 
+        $session = M::mock('Symfony\Component\HttpFoundation\Session\Session');
+        $session->shouldReceive('set')->with('_region','de');
+
         $request= M::mock('Symfony\Component\HttpFoundation\Request');
         $request->attributes = M::mock('Symfony\Component\HttpFoundation\ParameterBag')->shouldReceive('set')->with('de');
         $request->cookies = M::mock('Symfony\Component\HttpFoundation\ParameterBag')->shouldReceive('set')->with('de');
+        $request->shouldReceive('getSession')->andReturn($session);
 
         $responseEvent = M::mock('Symfony\Component\HttpKernel\Event\GetResponseEvent');
         $responseEvent->shouldReceive('getRequest')->andReturn($request);

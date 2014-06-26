@@ -2,12 +2,7 @@
 
 namespace TPN\RegionalRoutingBundle\Tests\Router;
 
-use Maxmind\Bundle\GeoipBundle\Service\GeoipManager;
-use Maxmind\lib\GeoIpRecord;
 use Mockery as M;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
-use TPN\RegionalRoutingBundle\Exception\RegionNotFoundException;
 use TPN\RegionalRoutingBundle\Router\RegionResolver;
 
 /**
@@ -37,8 +32,9 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
     public function testResolveRegionGeoIp()
     {
 
-        $flashBag = new FlashBag();
-        $this->request->shouldReceive('getSession->getFlashBag')->andReturn($flashBag);
+        $session = M::mock('Symfony\Component\HttpFoundation\Session\Session');
+        $session->shouldReceive('get')->with('_region')->andReturn(null);
+        $this->request->shouldReceive('getSession')->andReturn($session);
 
         $this->request->cookies =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->cookies->shouldReceive('get')->with('_region')->andReturn(null);
@@ -52,16 +48,16 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         var_dump($regionResolver->resolveRegion());
     }
 
-    public function testGetFlashBagRegion()
+    public function testGetSessionRegion()
     {
 
-        $flashBag = new FlashBag();
-        $flashBag->set('_region','pl');
-        $this->request->shouldReceive('getSession->getFlashBag')->andReturn($flashBag);
+        $session = M::mock('Symfony\Component\HttpFoundation\Session\Session');
+        $session->shouldReceive('get')->with('_region')->andReturn('pl');
+        $this->request->shouldReceive('getSession')->andReturn($session);
 
         $regionResolver = new RegionResolver($this->geoIpManager, $this->request);
 
-        $this->assertEquals('pl', $regionResolver->getFlashBagRegion());
+        $this->assertEquals('pl', $regionResolver->getSessionRegion());
     }
 
     public function testGetCookieRegion()

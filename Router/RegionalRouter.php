@@ -49,7 +49,7 @@ class RegionalRouter extends Router
         }
 
         try {
-            return parent::generate($region.self::ROUTE_PREFIX.$name, $parameters, $referenceType);
+            return parent::generate($region.static::ROUTE_PREFIX.$name, $parameters, $referenceType);
         } catch (RouteNotFoundException $ex) {
             return parent::generate($name, $parameters, $referenceType);
         }
@@ -61,9 +61,9 @@ class RegionalRouter extends Router
      */
     private function removePrefixFromRoute($name)
     {
-        $regionalRoute = strstr($name, RegionalRouter::ROUTE_PREFIX);
+        $regionalRoute = strstr($name, static::ROUTE_PREFIX);
         if ($regionalRoute) {
-            return str_replace(RegionalRouter::ROUTE_PREFIX, '', $regionalRoute);
+            return str_replace(static::ROUTE_PREFIX, '', $regionalRoute);
         }
 
         return $name;

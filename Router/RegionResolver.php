@@ -39,9 +39,10 @@ class RegionResolver
      */
     public function resolveRegion()
     {
-        $flashBagRegion = $this->getFlashBagRegion();
-        if (!empty($flashBagRegion)) {
-            return $flashBagRegion;
+
+        $sessionRegion = $this->getSessionRegion();
+        if (!empty($sessionRegion)) {
+            return $sessionRegion;
         }
 
         $cookieRegion = $this->getCookieRegion();
@@ -73,14 +74,9 @@ class RegionResolver
     /**
      * @return string|null region
      */
-    public function getFlashBagRegion()
+    public function getSessionRegion()
     {
-        $flashBagRegion = $this->request->getSession()->getFlashBag()->get('_region');
-        if (!empty($flashBagRegion)) {
-            return $flashBagRegion[0];
-        }
-
-        return null;
+        return $this->request->getSession()->get('_region');
     }
 
     /**
