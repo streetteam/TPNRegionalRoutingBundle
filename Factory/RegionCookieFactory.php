@@ -10,6 +10,13 @@ use Symfony\Component\HttpFoundation\Cookie;
  */
 class RegionCookieFactory
 {
+
+    private $lifetime;
+
+    public function __construct($lifetime)
+    {
+        $this->lifetime = $lifetime;
+    }
     /**
      * @param $region
      * @return Cookie
@@ -19,7 +26,7 @@ class RegionCookieFactory
         return new Cookie(
             '_region',
             $region,
-            time() + 3600 * 24 * 365 * 10,
+            time() + $this->lifetime,
             '/'
         );
     }

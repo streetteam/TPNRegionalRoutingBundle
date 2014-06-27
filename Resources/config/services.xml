@@ -32,6 +32,7 @@
         </service>
 
         <service id="tpn.router.region_cookie_factory" class="%tpn.router.region_cookie_factory.class%">
+            <argument>%tpn_regional_routing.cookie.lifetime%</argument>
         </service>
 
         <service id="tpn.region_listener" class="%tpn.region_listener.class%">
