@@ -73,10 +73,10 @@ class RegionListener implements EventSubscriberInterface
 
     public function onKernelResponse(FilterResponseEvent $event)
     {
-        $request = $event->getRequest();
+        $region = $event->getRequest()->attributes->get('_region');
         $response = $event->getResponse();
 
-        $cookie = $this->regionCookieFactory->create($request->attributes->get('_region'));
+        $cookie = $this->regionCookieFactory->create($region);
         $response->headers->setCookie($cookie);
     }
 

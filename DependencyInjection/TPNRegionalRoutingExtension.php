@@ -21,7 +21,9 @@ class TPNRegionalRoutingExtension extends Extension
 
         $loader = new XmlFileLoader($container, new FileLocator(array(__DIR__.'/../Resources/config')));
         $loader->load('services.xml');
+
         $container->setParameter('tpn_regional_routing.regions', $config['regions']);
+        $container->setParameter('tpn_regional_routing.cookie.lifetime', $config['cookie']['lifetime']);
         $container->setParameter('tpn_regional_routing.choose_region_route', $config['choose_region_route']);
     }
 
