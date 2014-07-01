@@ -44,8 +44,30 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->geoIpRecord->shouldReceive('getCountryCode')->andReturn(false);
         $this->request->shouldReceive('getClientIp')->andReturn('127.0.0.1');
 
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request);
-        var_dump($regionResolver->resolveRegion());
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'));
+        $this->assertEquals('pl', $regionResolver->resolveRegion());
+    }
+
+    /**
+     * When region found.
+     */
+    public function testResolveRegion()
+    {
+
+        $session = M::mock('Symfony\Component\HttpFoundation\Session\Session');
+        $session->shouldReceive('get')->with('_region')->andReturn(null);
+        $this->request->shouldReceive('getSession')->andReturn($session);
+
+        $this->request->cookies =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
+        $this->request->cookies->shouldReceive('get')->with('_region')->andReturn(null);
+
+        $this->request->shouldReceive('get')->with('_route')->andReturn('route_name');
+
+        $this->geoIpRecord->shouldReceive('getCountryCode')->andReturn('pl');
+        $this->request->shouldReceive('getClientIp')->andReturn('127.0.0.1');
+
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'));
+        $this->assertEquals('pl', $regionResolver->resolveRegion());
     }
 
     public function testGetSessionRegion()
@@ -55,7 +77,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $session->shouldReceive('get')->with('_region')->andReturn('pl');
         $this->request->shouldReceive('getSession')->andReturn($session);
 
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request);
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'));
 
         $this->assertEquals('pl', $regionResolver->getSessionRegion());
     }
@@ -65,7 +87,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->request->cookies =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->cookies->shouldReceive('get')->with('_region')->andReturn('pl');
 
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request);
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'));
 
         $this->assertEquals('pl', $regionResolver->getCookieRegion());
     }
@@ -74,7 +96,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
     {
         $this->request->shouldReceive('get')->with('_route')->andReturn('pl--RR--route_name');
 
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request);
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'));
 
         $this->assertEquals('pl', $regionResolver->getRouteRegion());
     }
@@ -84,7 +106,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->geoIpRecord->shouldReceive('getCountryCode')->andReturn('pl');
         $this->request->shouldReceive('getClientIp')->andReturn('127.0.0.1');
 
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request);
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'));
 
         $this->assertEquals('pl', $regionResolver->getGeoIpRegion());
 

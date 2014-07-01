@@ -24,13 +24,20 @@ class RegionResolver
     private $request;
 
     /**
+     * @var array
+     */
+    private $validRegions;
+
+    /**
      * @param GeoipManager $geoIp
      * @param Request      $request
+     * @param array        $validRegions
      */
-    public function __construct(GeoipManager $geoIp, Request $request)
+    public function __construct(GeoipManager $geoIp, Request $request, array $validRegions)
     {
         $this->geoIp = $geoIp;
         $this->request = $request;
+        $this->validRegions = $validRegions;
     }
 
     /**
@@ -38,6 +45,16 @@ class RegionResolver
      * @throws RegionNotFoundException
      */
     public function resolveRegion()
+    {
+      $region = $this->tryToFindRegion();
+      if (!in_array($region, $this->validRegions)) {
+          throw new RegionNotFoundException();
+      }
+
+        return $region;
+    }
+
+    private function tryToFindRegion()
     {
 
         $sessionRegion = $this->getSessionRegion();
