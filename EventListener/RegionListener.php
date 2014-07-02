@@ -23,6 +23,7 @@ class RegionListener implements EventSubscriberInterface
     private $router;
     private $resolver;
     private $regionCookieFactory;
+    private $regionChooseRoute;
 
     /**
      * @param RegionResolver      $resolver

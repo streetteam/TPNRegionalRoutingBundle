@@ -59,7 +59,7 @@ class RegionalRouter extends Router
      * @param $name
      * @return string non-regionalized route
      */
-    private function removePrefixFromRoute($name)
+    public function removePrefixFromRoute($name)
     {
         $regionalRoute = strstr($name, static::ROUTE_PREFIX);
         if ($regionalRoute) {
