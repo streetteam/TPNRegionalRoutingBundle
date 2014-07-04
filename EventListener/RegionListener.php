@@ -66,7 +66,7 @@ class RegionListener implements EventSubscriberInterface
             if ('_' == $route[0]) {
                 return;
             }
-            $routeParams = array_merge($request->get('_route_params'), array('_region'=> $region));
+            $routeParams = array_merge($request->get('_route_params',array()), array('_region'=> $region));
             $url = $this->router->generate($route, $routeParams);
             $event->setResponse(new RedirectResponse($url));
         }
