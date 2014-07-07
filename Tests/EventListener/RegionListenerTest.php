@@ -17,60 +17,87 @@ use TPN\RegionalRoutingBundle\Factory\RegionCookieFactory;
  */
 class RegionListenerTest extends \PHPUnit_Framework_TestCase
 {
+
+    private $requestContext;
+    private $router;
+    private $session;
+    private $request;
+    private $response;
+    private $getResponseEvent;
+    private $filterResponseEvent;
+    private $regionCookieFactory;
+
+    public function setUp()
+    {
+        $this->requestContext = M::mock('Symfony\Component\Routing\RequestContext');
+
+        $this->router = M::mock('TPN\RegionalRoutingBundle\Router\RegionalRouter');
+        $this->router->shouldReceive('getContext')->andReturn($this->requestContext);
+
+        $this->session = M::mock('Symfony\Component\HttpFoundation\Session\Session');
+
+        $this->response = M::mock('Symfony\Component\HttpFoundation\Response');
+        $this->response->headers = M::mock('Symfony\Component\HttpFoundation\ResponseHeaderBag');
+
+        $this->request= M::mock('Symfony\Component\HttpFoundation\Request');
+        $this->request->attributes = M::mock('Symfony\Component\HttpFoundation\ParameterBag');
+        $this->request->cookies = M::mock('Symfony\Component\HttpFoundation\ParameterBag');
+        $this->request->shouldReceive('getSession')->andReturn($this->session);
+
+        $this->filterResponseEvent = M::mock('Symfony\Component\HttpKernel\Event\FilterResponseEvent');
+        $this->filterResponseEvent->shouldReceive('getRequest')->andReturn($this->request);
+        $this->filterResponseEvent->shouldReceive('getResponse')->andReturn($this->response);
+
+        $this->getResponseEvent = M::mock('Symfony\Component\HttpKernel\Event\GetResponseEvent');
+        $this->getResponseEvent->shouldReceive('getRequest')->andReturn($this->request);
+
+        $this->regionResolver = M::mock('TPN\RegionalRoutingBundle\Router\RegionResolver');
+        $this->regionCookieFactory = M::mock('TPN\RegionalRoutingBundle\Factory\RegionCookieFactory');
+    }
+
     public function testOnKernelRequest()
     {
-        $requestContext = M::mock('Symfony\Component\Routing\RequestContext');
-        $requestContext->shouldReceive('setParameter')->with('_region','de');
+        $this->requestContext->shouldReceive('setParameter')->with('_region','de');
+        $this->regionResolver->shouldReceive('resolveRegion')->andReturn('de');
+        $this->regionResolver->shouldReceive('getRouteRegion')->andReturn('de');
 
-        $router = M::mock('TPN\RegionalRoutingBundle\Router\RegionalRouter');
-        $router->shouldReceive('getContext')->andReturn($requestContext);
+        $this->session->shouldReceive('set')->with('_region', 'de');
+        $this->request->attributes->shouldReceive('set')->with('_region', 'de');
+        $this->request->cookies->shouldReceive('set')->with('_region', 'de');
 
-        $session = M::mock('Symfony\Component\HttpFoundation\Session\Session');
-        $session->shouldReceive('set')->with('_region','de');
+        $regionListener = new RegionListener($this->regionResolver, $this->router, $this->regionCookieFactory, 'test_route');
+        $regionListener->onKernelRequest($this->getResponseEvent);
+    }
 
-        $request= M::mock('Symfony\Component\HttpFoundation\Request');
-        $request->attributes = M::mock('Symfony\Component\HttpFoundation\ParameterBag')->shouldReceive('set')->with('de');
-        $request->cookies = M::mock('Symfony\Component\HttpFoundation\ParameterBag')->shouldReceive('set')->with('de');
-        $request->shouldReceive('getSession')->andReturn($session);
+    public function testEmptyRouteParamsOnKernelRequest()
+    {
+        $this->requestContext->shouldReceive('setParameter')->with('_region','pl');
+        $this->regionResolver->shouldReceive('resolveRegion')->andReturn('pl');
+        $this->regionResolver->shouldReceive('getRouteRegion')->andReturn('de');
 
-        $responseEvent = M::mock('Symfony\Component\HttpKernel\Event\GetResponseEvent');
-        $responseEvent->shouldReceive('getRequest')->andReturn($request);
+        $this->session->shouldReceive('set')->with('_region', 'pl');
+        $this->request->attributes->shouldReceive('set')->with('_region', 'pl');
+        $this->request->cookies->shouldReceive('set')->with('_region', 'pl');
+        $this->request->shouldReceive('get')->with('_route')->andReturn('test_route');
+        $this->request->shouldReceive('get')->with('_route_params', array())->andReturn(array());
+        $this->router->shouldReceive('generate')->andReturn ('http://localhost');
+        $this->getResponseEvent->shouldReceive('setResponse');
 
-        $regionResolver = M::mock('TPN\RegionalRoutingBundle\Router\RegionResolver');
-        $regionResolver->shouldReceive('resolveRegion')->andReturn('de');
-        $regionResolver->shouldReceive('getRouteRegion')->andReturn('de');
-
-        $regionCookieFactory = M::mock('TPN\RegionalRoutingBundle\Factory\RegionCookieFactory');
-
-        $regionListener = new RegionListener($regionResolver, $router, $regionCookieFactory, 'test_route');
-        $regionListener->onKernelRequest($responseEvent);
+        $regionListener = new RegionListener($this->regionResolver, $this->router, $this->regionCookieFactory, 'test_route');
+        $regionListener->onKernelRequest($this->getResponseEvent);
     }
 
     public function testOnKernelResponse()
     {
-        $router = M::mock('TPN\RegionalRoutingBundle\Router\RegionalRouter');
+
         $cookie = M::mock('Symfony\Component\HttpFoundation\Cookie');
 
-        $response = M::mock('Symfony\Component\HttpFoundation\Response');
-        $response->headers = M::mock('Symfony\Component\HttpFoundation\ResponseHeaderBag');
-        $response->headers->shouldReceive('setCookie')->with($cookie);
+        $this->response->headers->shouldReceive('setCookie')->with($cookie);
+        $this->request->attributes = new ParameterBag(array('_route'=>'de'));
+        $this->regionCookieFactory->shouldReceive('create')->andReturn($cookie);
 
-        $request= M::mock('Symfony\Component\HttpFoundation\Request');
-        $request->attributes = new ParameterBag(array('_route'=>'de'));
-
-        $responseEvent = M::mock('Symfony\Component\HttpKernel\Event\GetResponseEvent');
-        $responseEvent->shouldReceive('getRequest')->andReturn($request);
-
-        $regionResolver = M::mock('TPN\RegionalRoutingBundle\Router\RegionResolver');
-
-        $regionCookieFactory = M::mock('TPN\RegionalRoutingBundle\Factory\RegionCookieFactory');
-        $regionCookieFactory->shouldReceive('create')->andReturn($cookie);
-        $filterResponseEvenet = M::mock('Symfony\Component\HttpKernel\Event\FilterResponseEvent');
-        $filterResponseEvenet->shouldReceive('getRequest')->andReturn($request);
-        $filterResponseEvenet->shouldReceive('getResponse')->andReturn($response);
-
-        $regionListener = new RegionListener($regionResolver, $router, $regionCookieFactory, 'test_route');
-        $regionListener->onKernelResponse($filterResponseEvenet);
+        $regionListener = new RegionListener($this->regionResolver, $this->router, $this->regionCookieFactory, 'test_route');
+        $regionListener->onKernelResponse($this->filterResponseEvent);
     }
 
     public function testSubscribedEvents()
@@ -82,6 +109,18 @@ class RegionListenerTest extends \PHPUnit_Framework_TestCase
             ),
 
             RegionListener::getSubscribedEvents());
+    }
+
+    public function tearDown()
+    {
+        $this->requestContext = null;
+        $this->router = null;
+        $this->session = null;
+        $this->request = null;
+        $this->response = null;
+        $this->getResponseEvent = null;
+        $this->filterResponseEvent = null;
+        $this->regionCookieFactory = null;
     }
 
 }
