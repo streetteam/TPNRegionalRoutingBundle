@@ -27,17 +27,21 @@ class RegionResolver
      * @var array
      */
     private $validRegions;
-
+    /**
+     * @var string
+     */
+    private $fallbackRegion;
     /**
      * @param GeoipManager $geoIp
      * @param Request      $request
      * @param array        $validRegions
      */
-    public function __construct(GeoipManager $geoIp, Request $request, array $validRegions)
+    public function __construct(GeoipManager $geoIp, Request $request, array $validRegions, $fallbackRegion)
     {
         $this->geoIp = $geoIp;
         $this->request = $request;
         $this->validRegions = $validRegions;
+        $this->fallbackRegion = $fallbackRegion;
     }
 
     /**
@@ -46,38 +50,51 @@ class RegionResolver
      */
     public function resolveRegion()
     {
-      $region = $this->tryToFindRegion();
-      if (!in_array($region, $this->validRegions)) {
-          throw new RegionNotFoundException();
-      }
+        $sessionRegion = $this->getSessionRegion();
+        if ($this->isRegionValid($sessionRegion)) {
+            return $sessionRegion;
+        }
 
-        return $region;
+        $cookieRegion = $this->getCookieRegion();
+        if ($this->isRegionValid($cookieRegion)) {
+            return $cookieRegion;
+        }
+
+        $routeRegion = $this->getRouteRegion();
+        if ($this->isRegionValid($routeRegion)) {
+            return $routeRegion;
+        }
+
+        $geoIpRegion = $this->getGeoIpRegion();
+        if ($this->isRegionValid($geoIpRegion)) {
+            return $geoIpRegion;
+        }
+
+        $fallbackRegion = $this->getFallbackRegion();
+        if ($this->isRegionValid($fallbackRegion)) {
+            return $fallbackRegion;
+        }
+
+        throw new RegionNotFoundException("Region not found");
     }
 
     private function tryToFindRegion()
     {
 
-        $sessionRegion = $this->getSessionRegion();
-        if (!empty($sessionRegion)) {
-            return $sessionRegion;
+    }
+
+    private function isRegionValid($region)
+    {
+        if (in_array($region, $this->validRegions)) {
+            return true;
         }
 
-        $cookieRegion = $this->getCookieRegion();
-        if (!empty($cookieRegion)) {
-            return $cookieRegion;
-        }
+        return false;
+    }
 
-        $routeRegion = $this->getRouteRegion();
-        if (!empty($routeRegion)) {
-            return $routeRegion;
-        }
-
-        $geoIpRegion = $this->getGeoIpRegion();
-        if (!empty($geoIpRegion)) {
-            return $geoIpRegion;
-        }
-
-        throw new RegionNotFoundException("Region not found");
+    public function getFallbackRegion()
+    {
+        return $this->fallbackRegion;
     }
 
     /**

@@ -30,6 +30,8 @@
             <argument type="service" id="maxmind.geoip" />
             <argument type="service" id="request" strict="false"/>
             <argument>%tpn_regional_routing.regions%</argument>
+            <argument>%tpn_regional_routing.fallback%</argument>
+
         </service>
 
         <service id="tpn.router.region_cookie_factory" class="%tpn.router.region_cookie_factory.class%">

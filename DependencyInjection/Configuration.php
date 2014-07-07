@@ -32,6 +32,9 @@ final class Configuration implements ConfigurationInterface
             ->scalarNode('choose_region_route')
                 ->isRequired()
             ->end()
+            ->scalarNode('fallback')
+                ->defaultValue(null)
+            ->end()
         ->end();
 
         return $treeBuilder;
