@@ -77,7 +77,7 @@ class RegionResolver
 
         throw new RegionNotFoundException("Region not found");
     }
-    
+
     private function isRegionValid($region)
     {
         if (in_array($region, $this->validRegions)) {
