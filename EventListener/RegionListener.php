@@ -48,7 +48,7 @@ class RegionListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $routeName = $request->get('_route');
         $route = $this->router->getRouteCollection()->get($routeName);
-        if ($this->excluder->isExcluded($route, $routeName)) {
+        if (null == $route || $this->excluder->isExcluded($route, $routeName)) {
             return;
         }
 
