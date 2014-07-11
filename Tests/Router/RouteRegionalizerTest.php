@@ -5,6 +5,7 @@ namespace TPN\RegionalRoutingBundle\Tests\Router;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use TPN\RegionalRoutingBundle\Router\RouteRegionalizer;
+use Mockery as M;
 
 /**
  * Class RouteRegionalizerTest
@@ -16,23 +17,28 @@ class RouteRegionalizerTest extends \PHPUnit_Framework_TestCase
     {
         $routeCollection = new RouteCollection();
         $routeCollection->add('foo', new Route('/foo'));
+        $excluder = M::mock('TPN\RegionalRoutingBundle\Router\RegionRouteExcluder');
+        $excluder->shouldReceive('isExcluded')->andReturn(false);
 
-        $regionalizer = new RouteRegionalizer(array('gb', 'us', 'rest'));
-        $regionalizedRouteCollectio = $regionalizer->createRegionalizedRoutes($routeCollection);
+        $regionalizer = new RouteRegionalizer(array('gb', 'us', 'rest'), $excluder);
+        $newRouteCollection = $regionalizer->createRegionalizedRoutes($routeCollection);
 
-        $this->assertCount(4,$regionalizedRouteCollectio);
+        $this->assertCount(4,$newRouteCollection);
 
     }
 
-    public function testDoNotRegionalizeRegionalize()
+    public function testDoNotRegionalizeUnderscored()
     {
         $routeCollection = new RouteCollection();
         $routeCollection->add('_foo', new Route('/_foo'));
 
-        $regionalizer = new RouteRegionalizer(array('gb', 'us', 'rest'));
-        $regionalizedRouteCollectio = $regionalizer->createRegionalizedRoutes($routeCollection);
+        $excluder = M::mock('TPN\RegionalRoutingBundle\Router\RegionRouteExcluder');
+        $excluder->shouldReceive('isExcluded')->andReturn(true);
 
-        $this->assertCount(1,$regionalizedRouteCollectio);
+        $regionalizer = new RouteRegionalizer(array('gb', 'us', 'rest'), $excluder);
+        $newRouteCollection = $regionalizer->createRegionalizedRoutes($routeCollection);
+
+        $this->assertCount(1,$newRouteCollection);
 
     }
 
@@ -42,10 +48,26 @@ class RouteRegionalizerTest extends \PHPUnit_Framework_TestCase
         $route =new Route('/foo');
         $route->setOption('isRegionalized', true);
         $routeCollection->add('foo', $route);
+        $excluder = M::mock('TPN\RegionalRoutingBundle\Router\RegionRouteExcluder');
+        $excluder->shouldReceive('isExcluded')->andReturn(false);
 
-        $regionalizer = new RouteRegionalizer(array('gb', 'us', 'rest'));
-        $regionalizedRouteCollectio = $regionalizer->createRegionalizedRoutes($routeCollection);
+        $regionalizer = new RouteRegionalizer(array('gb', 'us', 'rest'), $excluder);
+        $newRouteCollection = $regionalizer->createRegionalizedRoutes($routeCollection);
 
-        $this->assertCount(1,$regionalizedRouteCollectio);
+        $this->assertCount(1,$newRouteCollection);
+    }
+
+    public function testDoNotRegionalizeExcluded()
+    {
+        $routeCollection = new RouteCollection();
+        $route =new Route('/foo');
+        $routeCollection->add('foo', $route);
+        $excluder = M::mock('TPN\RegionalRoutingBundle\Router\RegionRouteExcluder');
+        $excluder->shouldReceive('isExcluded')->andReturn(true);
+
+        $regionalizer = new RouteRegionalizer(array('gb', 'us', 'rest'), $excluder);
+        $newRouteCollection = $regionalizer->createRegionalizedRoutes($routeCollection);
+
+        $this->assertCount(1,$newRouteCollection);
     }
 }

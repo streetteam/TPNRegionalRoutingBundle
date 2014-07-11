@@ -9,10 +9,12 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Routing\Route;
 use TPN\RegionalRoutingBundle\Exception\RegionNotFoundException;
 use TPN\RegionalRoutingBundle\Factory\RegionCookieFactory;
 use TPN\RegionalRoutingBundle\Router\RegionalRouter;
 use TPN\RegionalRoutingBundle\Router\RegionResolver;
+use TPN\RegionalRoutingBundle\Router\RegionRouteExcluder;
 
 /**
  * Class RegionListener
@@ -24,6 +26,7 @@ class RegionListener implements EventSubscriberInterface
     private $resolver;
     private $regionCookieFactory;
     private $regionChooseRoute;
+    private $excluder;
 
     /**
      * @param RegionResolver      $resolver
@@ -31,18 +34,23 @@ class RegionListener implements EventSubscriberInterface
      * @param RegionalRouter      $router
      * @param $regionChooseRoute
      */
-    public function __construct(RegionResolver $resolver, RegionalRouter $router, RegionCookieFactory $regionCookieFactory, $regionChooseRoute)
+    public function __construct(RegionResolver $resolver, RegionalRouter $router, RegionCookieFactory $regionCookieFactory, RegionRouteExcluder $excluder, $regionChooseRoute)
     {
         $this->resolver = $resolver;
         $this->router = $router;
         $this->regionCookieFactory = $regionCookieFactory;
         $this->regionChooseRoute = $regionChooseRoute;
-
+        $this->excluder = $excluder;
     }
 
     public function onKernelRequest(GetResponseEvent $event)
     {
         $request = $event->getRequest();
+        $routeName = $request->get('_route');
+        $route = $this->router->getRouteCollection()->get($routeName);
+        if ($this->excluder->isExcluded($route, $routeName)) {
+            return;
+        }
 
         try {
             $region = $this->resolver->resolveRegion();
@@ -62,12 +70,8 @@ class RegionListener implements EventSubscriberInterface
 
         $routeRegion = $this->resolver->getRouteRegion();
         if ($routeRegion != $region) {
-            $route = $request->get('_route');
-            if ('_' == $route[0]) {
-                return;
-            }
-            $routeParams = array_merge($request->get('_route_params',array()), array('_region'=> $region));
-            $url = $this->router->generate($route, $routeParams);
+            $routeParams = array_merge($request->get('_route_params'), array('_region'=> $region));
+            $url = $this->router->generate($routeName, $routeParams);
             $event->setResponse(new RedirectResponse($url));
         }
     }

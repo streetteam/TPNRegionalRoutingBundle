@@ -11,13 +11,15 @@ use Symfony\Component\Routing\RouteCollection;
 class RouteRegionalizer
 {
     private $regions;
+    private $excluder;
 
     /**
      * @param array $regions
      */
-    public function __construct(array $regions)
+    public function __construct(array $regions, RegionRouteExcluder $excluder)
     {
         $this->regions = $regions;
+        $this->excluder = $excluder;
     }
 
     /**
@@ -34,7 +36,7 @@ class RouteRegionalizer
 
         foreach ($collection->all() as $name => $route) {
 
-            if ('_' === $name[0] || $route->getOption('isRegionalized')) {
+            if ($this->excluder->isExcluded($route, $name) || $route->getOption('isRegionalized')) {
                 $regionalCollection->add($name, $route);
                 continue;
             }
