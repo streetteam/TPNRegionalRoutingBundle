@@ -97,7 +97,7 @@ class RegionResolver
      */
     public function getRouteRegion()
     {
-        return strstr($this->request->get('_route'), RegionalRouter::ROUTE_PREFIX, true);
+        return $this->request->attributes->get('_region');
     }
 
     /**
