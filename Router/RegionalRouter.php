@@ -69,4 +69,23 @@ class RegionalRouter extends Router
         return $name;
     }
 
+    /**
+     * @return string|null region
+     */
+    public function getRegionFromRoute($route)
+    {
+        return strstr($route, static::ROUTE_PREFIX, true);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function match($pathinfo)
+    {
+        $match = $this->getMatcher()->match($pathinfo);
+        $match['_region'] = $this->getRegionFromRoute($match['_route']);
+        $match['_route'] = $this->removePrefixFromRoute($match['_route']);
+        return $match;
+    }
+
 }
