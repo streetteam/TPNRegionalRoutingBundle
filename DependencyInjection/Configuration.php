@@ -35,6 +35,18 @@ final class Configuration implements ConfigurationInterface
             ->scalarNode('fallback')
                 ->defaultValue(null)
             ->end()
+            ->arrayNode('crawler')
+                ->children()
+                    ->scalarNode('region')
+                        ->isRequired()
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->arrayNode('userAgents')
+                        ->prototype('scalar')->end()
+                        ->defaultValue(array('bot','crawler','spider','google', 'bing', 'yahoo', 'baidu', 'yandex'))
+                    ->end()
+                ->end()
+            ->end()
         ->end();
 
         return $treeBuilder;

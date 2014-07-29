@@ -2,14 +2,12 @@
 
 namespace TPN\RegionalRoutingBundle\EventListener;
 
-use Symfony\Component\HttpFoundation\Cookie;
+
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Routing\Route;
 use TPN\RegionalRoutingBundle\Exception\RegionNotFoundException;
 use TPN\RegionalRoutingBundle\Factory\RegionCookieFactory;
 use TPN\RegionalRoutingBundle\Router\RegionalRouter;

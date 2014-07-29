@@ -3,7 +3,7 @@
     "description":  "This bundle regionalize your routes",
     "keywords":     ["routing"],
     "type":         "symfony-bundle",
-    "license":      "Apache2",
+    "license":      "Apache-2.0",
     "authors": [
         {
             "name":   "Wojciech Kulikowski",
@@ -20,7 +20,6 @@
         "symfony/http-kernel": "2.2.*",
         "symfony/yaml": "2.2.*",
         "symfony/routing": "2.2.*",
-        "sensio/framework-extra-bundle": "2.2.*",
         "phpunit/phpunit": "~4.1",
         "mockery/mockery": "dev-master"
     },
