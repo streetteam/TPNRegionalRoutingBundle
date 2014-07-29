@@ -123,7 +123,7 @@ class RegionResolver
     {
         $lookup = $this->geoIp->lookup($this->request->getClientIp());
 
-        return $lookup ? $lookup->getCountryCode() : null;
+        return $lookup ? strtolower($lookup->getCountryCode()) : null;
     }
 
 }
