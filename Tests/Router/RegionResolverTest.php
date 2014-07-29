@@ -27,7 +27,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
 
     /**
      * When no region found.
-     * @expectedException TPN\RegionalRoutingBundle\Exception\RegionNotFoundException
+     * @expectedException \TPN\RegionalRoutingBundle\Exception\RegionNotFoundException
      */
     public function testResolveRegionGeoIp()
     {
@@ -44,10 +44,19 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
 
         $this->request->shouldReceive('get')->with('_route')->andReturn('route_name');
 
+        $this->request->headers = M::mock('Symfony\Component\HttpFoundation\HeaderBag');
+        $this->request->headers->shouldReceive('get')->with('User-Agent')->andReturn('test');
+
         $this->geoIpRecord->shouldReceive('getCountryCode')->andReturn(false);
         $this->request->shouldReceive('getClientIp')->andReturn('127.0.0.1');
+        $options = array (
+            'validRegions' => array('pl'),
+            'fallbackRegion' => null,
+            'webCrawlerRegion' => null,
+            'userAgents' => array(),
+        );
 
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'), null);
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, $options);
         $this->assertEquals('pl', $regionResolver->resolveRegion());
     }
 
@@ -65,13 +74,20 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->request->cookies->shouldReceive('get')->with('_region')->andReturn(null);
         $this->request->attributes =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->attributes->shouldReceive('get')->with('_region')->andReturn(null);
+        $this->request->headers = M::mock('Symfony\Component\HttpFoundation\HeaderBag');
+        $this->request->headers->shouldReceive('get')->with('User-Agent')->andReturn('test');
 
         $this->request->shouldReceive('get')->with('_route')->andReturn('route_name');
 
         $this->geoIpRecord->shouldReceive('getCountryCode')->andReturn(false);
         $this->request->shouldReceive('getClientIp')->andReturn('127.0.0.1');
-
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'), 'pl');
+        $options = array(
+            'validRegions' => array('pl'),
+            'fallbackRegion' => 'pl',
+            'webCrawlerRegion' => null,
+            'userAgents' => array(),
+        );
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, $options);
         $this->assertEquals('pl', $regionResolver->resolveRegion());
     }
 
@@ -91,12 +107,20 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->request->attributes =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->attributes->shouldReceive('get')->with('_region')->andReturn(null);
 
+        $this->request->headers = M::mock('Symfony\Component\HttpFoundation\HeaderBag');
+        $this->request->headers->shouldReceive('get')->with('User-Agent')->andReturn('test');
+
         $this->request->shouldReceive('get')->with('_route')->andReturn('route_name');
 
         $this->geoIpRecord->shouldReceive('getCountryCode')->andReturn('pl');
         $this->request->shouldReceive('getClientIp')->andReturn('127.0.0.1');
-
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'), null);
+        $options = array(
+            'validRegions' => array('pl'),
+            'fallbackRegion' => null,
+            'webCrawlerRegion' => null,
+            'userAgents' => array(),
+        );
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, $options);
         $this->assertEquals('pl', $regionResolver->resolveRegion());
     }
 
@@ -109,7 +133,13 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->request->attributes =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->attributes->shouldReceive('get')->with('_region')->andReturn(null);
 
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'), null);
+        $options = array(
+            'validRegions' => array('pl'),
+            'fallbackRegion' => null,
+            'webCrawlerRegion' => null,
+            'userAgents' => array(),
+        );
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, $options);
 
         $this->assertEquals('pl', $regionResolver->getSessionRegion());
     }
@@ -118,8 +148,13 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
     {
         $this->request->cookies =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->cookies->shouldReceive('get')->with('_region')->andReturn('pl');
-
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'), null);
+        $options = array(
+            'validRegions' => array('pl'),
+            'fallbackRegion' => null,
+            'webCrawlerRegion' => null,
+            'userAgents' => array(),
+        );
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, $options);
 
         $this->assertEquals('pl', $regionResolver->getCookieRegion());
     }
@@ -129,8 +164,13 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->request->shouldReceive('get')->with('_route')->andReturn('pl--RR--route_name');
         $this->request->attributes =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->attributes->shouldReceive('get')->with('_region')->andReturn('pl');
-
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'), null);
+        $options = array(
+            'validRegions' => array('pl'),
+            'fallbackRegion' => null,
+            'webCrawlerRegion' => null,
+            'userAgents' => array(),
+        );
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, $options);
 
         $this->assertEquals('pl', $regionResolver->getRouteRegion());
     }
@@ -139,12 +179,35 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
     {
         $this->geoIpRecord->shouldReceive('getCountryCode')->andReturn('pl');
         $this->request->shouldReceive('getClientIp')->andReturn('127.0.0.1');
-
-        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, array('pl'), null);
+        $options = array(
+            'validRegions' => array('pl'),
+            'fallbackRegion' => null,
+            'webCrawlerRegion' => null,
+            'userAgents' => array(),
+        );
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, $options);
 
         $this->assertEquals('pl', $regionResolver->getGeoIpRegion());
 
     }
+
+    public function testWebCrawlerRegion()
+    {
+        $this->request->headers = M::mock('Symfony\Component\HttpFoundation\HeaderBag');
+        $this->request->headers->shouldReceive('get')->with('User-Agent')->andReturn('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+
+        $options = array(
+            'validRegions' => array('pl'),
+            'fallbackRegion' => null,
+            'webCrawlerRegion' => 'pl',
+            'userAgents' => array('googlebot'),
+        );
+        $regionResolver = new RegionResolver($this->geoIpManager, $this->request, $options);
+
+        $this->assertEquals('pl', $regionResolver->getWebCrawlerRegion());
+
+    }
+
     public function tearDown()
     {
         $this->geoIpRecord = null;

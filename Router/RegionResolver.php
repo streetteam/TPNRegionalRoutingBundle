@@ -3,7 +3,6 @@
 namespace TPN\RegionalRoutingBundle\Router;
 
 use Maxmind\Bundle\GeoipBundle\Service\GeoipManager;
-use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\Request;
 use TPN\RegionalRoutingBundle\Exception\RegionNotFoundException;
 
@@ -27,21 +26,32 @@ class RegionResolver
      * @var array
      */
     private $validRegions;
+
     /**
      * @var string
      */
     private $fallbackRegion;
+
+    /**
+     * @var string
+     */
+    private $webCrawlerRegion;
+
     /**
      * @param GeoipManager $geoIp
      * @param Request      $request
      * @param array        $validRegions
      */
-    public function __construct(GeoipManager $geoIp, Request $request, array $validRegions, $fallbackRegion)
+    public function __construct(GeoipManager $geoIp, Request $request, $options)
     {
         $this->geoIp = $geoIp;
         $this->request = $request;
-        $this->validRegions = $validRegions;
-        $this->fallbackRegion = $fallbackRegion;
+
+        $this->fallbackRegion = isset($options['fallbackRegion']) ? $options['fallbackRegion'] : null;
+        $this->webCrawlerRegion = isset($options['webCrawlerRegion']) ? $options['webCrawlerRegion'] : null;
+        $this->userAgents = isset($options['userAgents']) ? $options['userAgents'] : array();
+        $this->validRegions = isset($options['validRegions']) ? $options['validRegions'] : array();
+
     }
 
     /**
@@ -65,6 +75,11 @@ class RegionResolver
             return $routeRegion;
         }
 
+        $webCrawlerRegion = $this->getWebCrawlerRegion();
+        if ($this->isRegionValid($webCrawlerRegion)) {
+            return $webCrawlerRegion;
+        }
+
         $geoIpRegion = $this->getGeoIpRegion();
         if ($this->isRegionValid($geoIpRegion)) {
             return $geoIpRegion;
@@ -80,6 +95,7 @@ class RegionResolver
 
     private function isRegionValid($region)
     {
+
         if (in_array($region, $this->validRegions)) {
             return true;
         }
@@ -98,6 +114,21 @@ class RegionResolver
     public function getRouteRegion()
     {
         return $this->request->attributes->get('_region');
+    }
+
+    /**
+     * @return string|null region
+     */
+    public function getWebCrawlerRegion()
+    {
+        $clientUserAgent = $this->request->headers->get('User-Agent');
+        foreach ($this->userAgents as $userAgent) {
+            if (strstr(strtolower($clientUserAgent),strtolower($userAgent))) {
+                return $this->webCrawlerRegion;
+            }
+        }
+
+        return null;
     }
 
     /**
