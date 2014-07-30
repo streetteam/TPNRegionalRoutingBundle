@@ -85,6 +85,7 @@ class RegionalRouter extends Router
         $match = $this->getMatcher()->match($pathinfo);
         $match['_region'] = $this->getRegionFromRoute($match['_route']);
         $match['_route'] = $this->removePrefixFromRoute($match['_route']);
+
         return $match;
     }
 
