@@ -2,7 +2,6 @@
 
 namespace TPN\RegionalRoutingBundle\EventListener;
 
-
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
@@ -54,7 +53,7 @@ class RegionListener implements EventSubscriberInterface
             $region = $this->resolver->resolveRegion();
         } catch (RegionNotFoundException $e) {
             if ($request->get('_route') != $this->regionChooseRoute) {
-                $landingUrl = $this->router->generate($this->regionChooseRoute);
+                $landingUrl = $this->router->generate($this->regionChooseRoute, $request->query->all());
                 $event->setResponse(new RedirectResponse($landingUrl));
             }
 
@@ -66,7 +65,7 @@ class RegionListener implements EventSubscriberInterface
 
         $routeRegion = $this->resolver->getRouteRegion();
         if ($routeRegion != $region) {
-            $routeParams = array_merge($request->get('_route_params'), array('_region'=> $region));
+            $routeParams = array_merge($request->get('_route_params'), array('_region'=> $region), $request->query->all());
             $url = $this->router->generate($routeName, $routeParams);
             $event->setResponse(new RedirectResponse($url));
         }

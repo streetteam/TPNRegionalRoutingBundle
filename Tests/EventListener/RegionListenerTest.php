@@ -2,10 +2,7 @@
 
 namespace TPN\RegionalRoutingBundle\Tests\EventListener;
 
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Route;
 use TPN\RegionalRoutingBundle\EventListener\RegionListener;
@@ -43,6 +40,7 @@ class RegionListenerTest extends \PHPUnit_Framework_TestCase
         $this->request= M::mock('Symfony\Component\HttpFoundation\Request');
         $this->request->attributes = M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->cookies = M::mock('Symfony\Component\HttpFoundation\ParameterBag');
+        $this->request->query = M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->shouldReceive('getSession')->andReturn($this->session);
         $this->request->shouldReceive('get')->with('_route')->andReturn('test_route');
         $this->request->shouldReceive('get')->with('_route_params')->andReturn(array());
@@ -84,9 +82,32 @@ class RegionListenerTest extends \PHPUnit_Framework_TestCase
         $this->session->shouldReceive('set')->with('_region', 'pl');
         $this->request->attributes->shouldReceive('set')->with('_region', 'pl');
         $this->request->cookies->shouldReceive('set')->with('_region', 'pl');
+        $this->request->query->shouldReceive('all')->andReturn(array('_utm'=> '123132', 'source' => 'social'));
         $this->request->shouldReceive('get')->with('_route')->andReturn('test_route');
         $this->request->shouldReceive('get')->with('_route_params', array())->andReturn(array());
         $this->router->shouldReceive('generate')->andReturn ('http://localhost');
+        $this->getResponseEvent->shouldReceive('setResponse');
+
+        $excluder = M::mock('TPN\RegionalRoutingBundle\Router\RegionRouteExcluder');
+        $excluder->shouldReceive('isExcluded')->andReturn(false);
+
+        $regionListener = new RegionListener($this->regionResolver, $this->router, $this->regionCookieFactory, $excluder, 'test_route');
+        $regionListener->onKernelRequest($this->getResponseEvent);
+    }
+
+    public function testUtmSourceOnKernelRequest()
+    {
+        $this->requestContext->shouldReceive('setParameter')->with('_region','pl');
+        $this->regionResolver->shouldReceive('resolveRegion')->andReturn('pl');
+        $this->regionResolver->shouldReceive('getRouteRegion')->andReturn('de');
+
+        $this->session->shouldReceive('set')->with('_region', 'pl');
+        $this->request->attributes->shouldReceive('set')->with('_region', 'pl');
+        $this->request->cookies->shouldReceive('set')->with('_region', 'pl');
+        $this->request->query->shouldReceive('all')->andReturn(array('_utm'=> '123132', 'source' => 'social'));
+        $this->request->shouldReceive('get')->with('_route')->andReturn('test_route');
+        $this->request->shouldReceive('get')->with('_route_params', array())->andReturn(array());
+        $this->router->shouldReceive('generate')->with("test_route",array('_region' =>'pl','_utm'=> '123132', 'source' => 'social'))->andReturn('http://localhost');
         $this->getResponseEvent->shouldReceive('setResponse');
 
         $excluder = M::mock('TPN\RegionalRoutingBundle\Router\RegionRouteExcluder');
