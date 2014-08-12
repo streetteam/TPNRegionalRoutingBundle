@@ -33,7 +33,7 @@
             <argument type="service" id="request" strict="false"/>
             <argument type="collection">
                 <argument key="validRegions">%tpn_regional_routing.regions%</argument>
-                <argument key="fallback">%tpn_regional_routing.fallback%</argument>
+                <argument key="fallbackRegion">%tpn_regional_routing.fallback%</argument>
                 <argument key="webCrawlerRegion">%tpn_regional_routing.crawler.region%</argument>
                 <argument key="userAgents">%tpn_regional_routing.crawler.userAgents%</argument>
             </argument>
