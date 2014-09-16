@@ -3,6 +3,7 @@
 namespace TPN\RegionalRoutingBundle\Tests\Router;
 
 use Mockery as M;
+use TPN\RegionalRoutingBundle\Router\RegionalRouter;
 use TPN\RegionalRoutingBundle\Router\RegionResolver;
 
 /**
@@ -40,7 +41,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->request->cookies->shouldReceive('get')->with('_region')->andReturn(null);
 
         $this->request->attributes =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
-        $this->request->attributes->shouldReceive('get')->with('_region')->andReturn(null);
+        $this->request->attributes->shouldReceive('get')->with('_route')->andReturn('test');
 
         $this->request->shouldReceive('get')->with('_route')->andReturn('route_name');
 
@@ -73,7 +74,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->request->cookies =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
         $this->request->cookies->shouldReceive('get')->with('_region')->andReturn(null);
         $this->request->attributes =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
-        $this->request->attributes->shouldReceive('get')->with('_region')->andReturn(null);
+        $this->request->attributes->shouldReceive('get')->with('_route')->andReturn('test_route');
         $this->request->headers = M::mock('Symfony\Component\HttpFoundation\HeaderBag');
         $this->request->headers->shouldReceive('get')->with('User-Agent')->andReturn('test');
 
@@ -105,7 +106,7 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
         $this->request->cookies->shouldReceive('get')->with('_region')->andReturn(null);
 
         $this->request->attributes =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
-        $this->request->attributes->shouldReceive('get')->with('_region')->andReturn(null);
+        $this->request->attributes->shouldReceive('get')->with('_route')->andReturn('test_route');
 
         $this->request->headers = M::mock('Symfony\Component\HttpFoundation\HeaderBag');
         $this->request->headers->shouldReceive('get')->with('User-Agent')->andReturn('test');
@@ -163,7 +164,8 @@ class RegionResolverTest extends \PHPUnit_Framework_TestCase
     {
         $this->request->shouldReceive('get')->with('_route')->andReturn('pl--RR--route_name');
         $this->request->attributes =  M::mock('Symfony\Component\HttpFoundation\ParameterBag');
-        $this->request->attributes->shouldReceive('get')->with('_region')->andReturn('pl');
+        $this->request->attributes->shouldReceive('get')->with('_route')
+            ->andReturn('pl'.RegionalRouter::ROUTE_PREFIX.'test_rote');
         $options = array(
             'validRegions' => array('pl'),
             'fallbackRegion' => null,

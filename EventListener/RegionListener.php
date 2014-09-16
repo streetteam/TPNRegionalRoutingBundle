@@ -38,6 +38,7 @@ class RegionListener implements EventSubscriberInterface
         $this->regionCookieFactory = $regionCookieFactory;
         $this->regionChooseRoute = $regionChooseRoute;
         $this->excluder = $excluder;
+
     }
 
     public function onKernelRequest(GetResponseEvent $event)
@@ -54,6 +55,7 @@ class RegionListener implements EventSubscriberInterface
         } catch (RegionNotFoundException $e) {
             if ($request->get('_route') != $this->regionChooseRoute) {
                 $landingUrl = $this->router->generate($this->regionChooseRoute, $request->query->all());
+
                 $event->setResponse(new RedirectResponse($landingUrl));
             }
 
@@ -61,12 +63,16 @@ class RegionListener implements EventSubscriberInterface
         }
         $this->router->getContext()->setParameter('_region', $region);
 
+
         $request->getSession()->set('_region', $region);
 
         $routeRegion = $this->resolver->getRouteRegion();
+
+
         if ($routeRegion != $region) {
             $routeParams = array_merge($request->get('_route_params'), array('_region'=> $region), $request->query->all());
             $url = $this->router->generate($routeName, $routeParams);
+
             $event->setResponse(new RedirectResponse($url));
         }
     }
