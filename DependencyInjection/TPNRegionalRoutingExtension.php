@@ -17,7 +17,7 @@ class TPNRegionalRoutingExtension extends Extension
     public function load(array $configs, ContainerBuilder $container)
     {
         $processor = new Processor();
-        $config = $processor->processConfiguration(new Configuration, $configs);
+        $config = $processor->processConfiguration(new Configuration(), $configs);
 
         $loader = new XmlFileLoader($container, new FileLocator(array(__DIR__.'/../Resources/config')));
         $loader->load('services.xml');

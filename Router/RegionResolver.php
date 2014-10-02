@@ -136,6 +136,10 @@ class RegionResolver
      */
     public function getSessionRegion()
     {
+        if (!$this->request->getSession()) {
+            return null;
+        }
+
         return $this->request->getSession()->get('_region');
     }
 

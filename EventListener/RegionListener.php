@@ -63,11 +63,9 @@ class RegionListener implements EventSubscriberInterface
         }
         $this->router->getContext()->setParameter('_region', $region);
 
-
         $request->getSession()->set('_region', $region);
 
         $routeRegion = $this->resolver->getRouteRegion();
-
 
         if ($routeRegion != $region) {
             $routeParams = array_merge($request->get('_route_params'), array('_region'=> $region), $request->query->all());
@@ -80,6 +78,9 @@ class RegionListener implements EventSubscriberInterface
     public function onKernelResponse(FilterResponseEvent $event)
     {
         $cookieRegion = $this->resolver->getCookieRegion();
+        if (!$event->getRequest()->getSession()) {
+            return;
+        }
         $region = $event->getRequest()->getSession()->get('_region');
 
         if (empty($region) & !empty($cookieRegion)) {
